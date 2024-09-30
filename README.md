@@ -1,4 +1,4 @@
-# Hugh
+# Hugh v0.1
 
 ~~~
 Usage:
