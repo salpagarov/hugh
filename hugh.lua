@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-fs, json = require "lfs", require "lunajson" -- @todo: update to idented json encoder
+fs, json = require "lfs", require "lunajson"
 
 function isV(v) return type(v) ~= 'table' end
 function isA(a) return type(a) == 'table' and #a >  0 end
@@ -21,7 +21,7 @@ function get_files(directory)
   return files
 end
 
-function get_data(filename) -- @todo: update to correct json stream reader
+function get_data(filename)
   local file, meta, level = io.open(filename, 'r'), '', 0
   repeat
     local char = file:read(1)
@@ -61,7 +61,7 @@ function compare(a, b) -- @todo: update to complete json comparator + add wildca
   return true
 end
 
-function enrich(a,b) -- @todo: refact it (?)
+function enrich(a,b)
   if isT(a) then
     if isT(b) then
       for k,_ in pairs(b) do
@@ -114,30 +114,11 @@ do
   local magic = { __lt = compare, __add = enrich, __sub = enlean }
   local command, filter, update = arg[1] or 'help', setmetatable(json.decode(arg[2] or '{}'), magic), setmetatable(json.decode(arg[3] or '{}'), magic)
   local core, meta = setmetatable({}, magic), setmetatable({}, magic)
-  if command == "help" then
-    print([=[
-    Hugh v0.1, Hugo semantic helper.
-    Usage:
-      hugh [<command> ['<filter-json>' ['<update-json>']]]
-    Commands:
-      help    this text
-      core    get taxonomies
-      list    get posts list
-      add     enrich metadata
-      del     enlean metadata
-    Example:
-      hugh add '{"categories" : "video"}' '{"tags" : "video"}'
-      hugh del '{"categories" : "video"}' '{"categories" : "video"}'
-    Requirments:
-      luafilesystem
-      lunajson
-    ]=])
-  end
   if command == "list" then 
     for _, filename in ipairs(get_files(path)) do
       meta = get_data(filename)
       if meta > filter then 
-        print(filename)
+        print(filename, json.encode(meta))
       end
     end
   end
@@ -169,5 +150,24 @@ do
         put_data(filename,meta,text)
       end
     end
+  end
+  if command == "help" then
+    print([=[
+    Hugo semantic helper
+    Usage:
+      hugh [<command> ['<filter-json>' ['<update-json>']]]
+    Commands:
+      help    this text
+      core    get taxonomies
+      list    get posts list
+      add     enrich metadata
+      del     enlean metadata
+    Example:
+      hugh add '{"categories" : "video"}' '{"tags" : "video"}'
+      hugh del '{"categories" : "video"}' '{"categories" : "video"}'
+    Requirments:
+      luafilesystem
+      lunajson
+    ]=])
   end
 end
