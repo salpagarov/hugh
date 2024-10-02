@@ -41,7 +41,7 @@ function put_data(filename, meta, text)
   return io.open(filename, 'w'):write(json.encode(meta)):write(text):close()
 end
 
-function compare(a, b) -- @todo: update to complete json comparator + add wildcard nodes
+function compare(a, b)
   for k,v in pairs(a) do
     if not b[k] then return false end
     if type(a[k]) == 'table' and type(b[k]) == 'table' then

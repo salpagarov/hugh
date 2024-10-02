@@ -17,6 +17,7 @@ Example:
   
 Requirments:
   luafilesystem
-  lunajson      
+  lunajson
+  rxi-json (@todo)
 ~~~
 
