@@ -2,9 +2,9 @@
 
 fs, json = require "lfs", require "lunajson"
 
-function isV(v) return type(v) ~= 'table' end
-function isA(a) return type(a) == 'table' and #a >  0 end
-function isT(t) return type(t) == 'table' and #t == 0 end
+function isT(x) return type(x) == 'table' and #x == 0 end
+function isA(x) return type(x) == 'table' and #x ~= 0 end
+function isV(x) return type(x) ~= 'table' end
 
 function get_files(directory)
   local files = {}
@@ -41,24 +41,28 @@ function put_data(filename, meta, text)
   return io.open(filename, 'w'):write(json.encode(meta)):write(text):close()
 end
 
-function compare(a, b)
+function compare0(a, b)
   for k,v in pairs(a) do
     if not b[k] then return false end
-    if type(a[k]) == 'table' and type(b[k]) == 'table' then
+    if isT(a[k]) and isT(b[k]) then
       local a1 = {}; for _,vv in pairs(a[k]) do a1[vv] = true end
       local a2 = {}; for _,vv in pairs(b[k]) do a2[vv] = true end
       for k2,_ in pairs(a1) do
         if not a2[k2] then return false end
       end
     end
-    if type(a[k]) ~= 'table' and type(b[k]) == 'table' then
+    if isV(a[k]) and isA(b[k]) then
       local c2 = {}; for _,vv in pairs(b[k]) do c2[vv] = true end
       if not c2[a[k]] then return false end
     end
-    if type(a[k]) == 'table' and type(b[k]) ~= 'table' then return false end
-    if type(a[k]) ~= 'table' and type(b[k]) ~= 'table' and a[k] ~= b[k] then return false end
+    if isT(a[k]) and isV(b[k]) then return false end
+    if isV(a[k]) and isV(b[k]) and a[k] ~= b[k] then return false end
   end
   return true
+end
+
+function compare(a, b)
+  -- @todo: update to recursivelly compare with empty values (as a windcards)
 end
 
 function enrich(a,b)
@@ -111,26 +115,25 @@ end
 
 do
   local path = fs.currentdir()
-  local magic = { __lt = compare, __add = enrich, __sub = enlean }
+  local magic = { __lt = compare0, __add = enrich, __sub = enlean }
   local command, filter, update = arg[1] or 'help', setmetatable(json.decode(arg[2] or '{}'), magic), setmetatable(json.decode(arg[3] or '{}'), magic)
   local core, meta = setmetatable({}, magic), setmetatable({}, magic)
+  
   if command == "list" then 
     for _, filename in ipairs(get_files(path)) do
       meta = get_data(filename)
-      if meta > filter then 
-        print(filename, json.encode(meta))
-      end
+      if meta > filter then print(filename) end
     end
   end
+  
   if command == "core" then 
     for _,filename in pairs(get_files(path)) do
       meta = get_data(filename)
-      if meta > filter then 
-        core = core + meta
-      end
+      if meta > filter then core = core + meta end
     end
     print(json.encode(core))
   end
+  
   if command == "add" then 
     for _, filename in ipairs(get_files(path)) do
       meta,text = get_data(filename)
@@ -141,6 +144,7 @@ do
       end
     end
   end
+  
   if command == "del" then 
     for _, filename in ipairs(get_files(path)) do
       meta,text = get_data(filename)
@@ -151,6 +155,7 @@ do
       end
     end
   end
+  
   if command == "help" then
     print([=[
     Hugo semantic helper
