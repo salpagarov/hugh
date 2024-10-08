@@ -62,11 +62,25 @@ function compare0(a, b)
 end
 
 function compare(a, b)
+  if isV(a) and isV(b) and a == b then return true else return false end
+  if isA(a) and isV(b) then
+    for k,_ in pairs(a) do
+      if a[k] == b then return true end
+    end
+    return false
+  end
+  if isA(a) and isA(b) then 
+    for _,v in pairs(b) do
+      if not compare(a,v) then return false end
+    end
+    return true
+  end
   if isT(a) and isT(b) then
-    for k,v in pairs(b) do
-      if not a[k] then return false end
+    for k,_ in pairs(b) do
+      if not compare(a[k], b[k]) then return false end
     end
   end
+  return true
 end
 
 function enrich(a,b)
@@ -119,7 +133,7 @@ end
 
 do
   local path = fs.currentdir()
-  local magic = { __lt = compare0, __add = enrich, __sub = enlean }
+  local magic = { __lt = compare, __add = enrich, __sub = enlean }
   local command, filter, update = arg[1] or 'help', setmetatable(json.decode(arg[2] or '{}'), magic), setmetatable(json.decode(arg[3] or '{}'), magic)
   local core, meta = setmetatable({}, magic), setmetatable({}, magic)
   
