@@ -18,12 +18,13 @@ Example:
   hugh ren '{"authors" : ""}' '{"authors" : "persons"}'
   
 Requirments:
-  luafilesystem
-  lunajson
-  rxi-json (@todo)
+  luafilesystem, rxi-json
 ~~~
 
-## Замечания
+## Notes
 
-1. Параметры `filter` и `update` должны быть корректными JSON. При передаче в командной строке используйте двойные кавычки для узлов и значений, а одиночные - для всей JSON-строки.
-2. Пустые значения в `filter` соответствуют записям, в которых есть ключ - с любым содержанием.
+1. `filter` and `update` parameters must be valid JSON. Use double quotes for keys and values, and single - for entire JSON string.
+1. Empty values in `filter` correspond to records whose metadata contains a key with any value
+1. Empty values in `update` ignored.
+2. With `ren` command values in `update` defines new key names.
+

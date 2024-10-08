@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-fs, json = require "lfs", require "lunajson"
+fs, json = require "lfs", require "rxi-json"
 
 function isT(x) return type(x) == 'table' and #x == 0 end
 function isA(x) return type(x) == 'table' and #x ~= 0 end
@@ -62,7 +62,11 @@ function compare0(a, b)
 end
 
 function compare(a, b)
-  -- @todo: update to recursivelly compare with empty values (as a windcards)
+  if isT(a) and isT(b) then
+    for k,v in pairs(b) do
+      if not a[k] then return false end
+    end
+  end
 end
 
 function enrich(a,b)
@@ -158,7 +162,7 @@ do
   
   if command == "help" then
     print([=[
-    Hugo semantic helper
+    Hugo JSON semantic helper
     Usage:
       hugh [<command> ['<filter-json>' ['<update-json>']]]
     Commands:
@@ -171,8 +175,7 @@ do
       hugh add '{"categories" : "video"}' '{"tags" : "video"}'
       hugh del '{"categories" : "video"}' '{"categories" : "video"}'
     Requirments:
-      luafilesystem
-      lunajson
+      luafilesystem, rxi-json
     ]=])
   end
 end
