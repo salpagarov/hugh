@@ -153,6 +153,18 @@ do
     end
   end
   
+  if command == "ren" then 
+  for _, filename in ipairs(get_files(path)) do
+    meta,text = get_data(filename)
+    if meta > filter then 
+      meta,state = update(meta
+      
+      meta = meta - update
+      print(filename)
+      put_data(filename,meta,text)
+    end
+  end
+
   if command == "help" then
     print([=[
     Hugo JSON semantic helper
@@ -164,9 +176,11 @@ do
       list    get posts list
       add     enrich metadata
       del     enlean metadata
+      ren     change taxons name
     Example:
       hugh add '{"categories" : "video"}' '{"tags" : "video"}'
       hugh del '{"categories" : "video"}' '{"categories" : "video"}'
+      hugh ren '{"authors" : ""}' '{"authors" : "persons"}'
     Requirments:
       luafilesystem, rxi-json
     ]=])
