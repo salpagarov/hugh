@@ -41,46 +41,25 @@ function put_data(filename, meta, text)
   return io.open(filename, 'w'):write(json.encode(meta)):write(text):close()
 end
 
-function compare0(a, b)
-  for k,v in pairs(a) do
-    if not b[k] then return false end
-    if isT(a[k]) and isT(b[k]) then
-      local a1 = {}; for _,vv in pairs(a[k]) do a1[vv] = true end
-      local a2 = {}; for _,vv in pairs(b[k]) do a2[vv] = true end
-      for k2,_ in pairs(a1) do
-        if not a2[k2] then return false end
-      end
+function less(a, b)
+  if isV(a) and isV(b) and (a == b or b == '') then return true end
+  if isV(a) and isA(b) then
+    for k,_ in pairs(b) do
+      if less(b[k],a) then return true end
     end
-    if isV(a[k]) and isA(b[k]) then
-      local c2 = {}; for _,vv in pairs(b[k]) do c2[vv] = true end
-      if not c2[a[k]] then return false end
-    end
-    if isT(a[k]) and isV(b[k]) then return false end
-    if isV(a[k]) and isV(b[k]) and a[k] ~= b[k] then return false end
   end
-  return true
-end
-
-function compare(a, b)
-  if isV(a) and isV(b) and a == b then return true else return false end
-  if isA(a) and isV(b) then
-    for k,_ in pairs(a) do
-      if a[k] == b then return true end
+  if isA(a) and isA(b) then
+    for _,v in pairs(a) do
+      if less(b,v) then return true end
     end
-    return false
   end
-  if isA(a) and isA(b) then 
-    for _,v in pairs(b) do
-      if not compare(a,v) then return false end
+  if isT(a) and isT(b) then
+    for k,v in pairs(a) do
+      if not b[k] or not less(b[k],a[k]) then return false end
     end
     return true
   end
-  if isT(a) and isT(b) then
-    for k,_ in pairs(b) do
-      if not compare(a[k], b[k]) then return false end
-    end
-  end
-  return true
+  return false
 end
 
 function enrich(a,b)
@@ -133,7 +112,7 @@ end
 
 do
   local path = fs.currentdir()
-  local magic = { __lt = compare, __add = enrich, __sub = enlean }
+  local magic = { __lt = less, __add = enrich, __sub = enlean }
   local command, filter, update = arg[1] or 'help', setmetatable(json.decode(arg[2] or '{}'), magic), setmetatable(json.decode(arg[3] or '{}'), magic)
   local core, meta = setmetatable({}, magic), setmetatable({}, magic)
   
