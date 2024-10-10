@@ -110,6 +110,10 @@ function enlean(a,b)
   return a
 end
 
+function update (meta, update)
+  return meta
+end
+
 do
   local path = fs.currentdir()
   local magic = { __lt = less, __add = enrich, __sub = enlean }
@@ -153,15 +157,13 @@ do
     end
   end
   
-  if command == "ren" then 
-  for _, filename in ipairs(get_files(path)) do
-    meta,text = get_data(filename)
-    if meta > filter then 
-      meta,state = update(meta
-      
-      meta = meta - update
-      print(filename)
-      put_data(filename,meta,text)
+  if command == "update" then 
+    for _, filename in ipairs(get_files(path)) do
+      meta,text = get_data(filename)
+      if meta > filter then 
+        print(filename)
+        put_data(filename,update(meta,update),text)
+      end
     end
   end
 
@@ -176,7 +178,7 @@ do
       list    get posts list
       add     enrich metadata
       del     enlean metadata
-      ren     change taxons name
+      update  update taxonomy
     Example:
       hugh add '{"categories" : "video"}' '{"tags" : "video"}'
       hugh del '{"categories" : "video"}' '{"categories" : "video"}'

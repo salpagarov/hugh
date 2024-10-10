@@ -1,5 +1,4 @@
 # hugh v0.1
-
 ~~~
 Usage:
   hugh [<command> ['<filter-json>' ['<update-json>']]]
@@ -10,21 +9,18 @@ Commands:
   list    get posts list
   add     enrich metadata
   del     enlean metadata
-  ren     rename taxons
+  update  update taxonomy
   
 Example:
   hugh add '{"categories" : "video"}' '{"tags" : "video"}'
   hugh del '{"categories" : "video"}' '{"categories" : "video"}'
-  hugh ren '{"authors" : ""}' '{"authors" : "persons"}'
+  hugh update '{"authors" : ""}' '{"authors" : "persons"}'
   
 Requirments:
   luafilesystem, rxi-json
 ~~~
 
 ## Notes
-
-1. `filter` and `update` parameters must be valid JSON. Use double quotes for keys and values, and single - for entire JSON string.
-1. Empty values in `filter` used as wildcard (any value).
-1. Empty values in `update` ignored.
-2. With `ren` command values in `update` defines new key names.
+1. Arguments `filter` and `update` must be valid JSON. Use double quotes for keys and values, and single - for entire JSON string.
+2. Empty values in `filter` used as wildcard (any value), empty values in `update` ignored.
 
