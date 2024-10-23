@@ -21,7 +21,7 @@ function get_files(directory)
   return files
 end
 
-function get_data(filename) -- @todo: fix json-less markdown crash
+function get_data(filename)
   local file, meta, level = io.open(filename, 'r'), '', 0
   repeat
     local char = file:read(1)
@@ -63,6 +63,8 @@ function less(a, b)
 end
 
 function enrich(a,b)
+  if not a then a={} end
+  if isV(a) then a={a} end
   if isT(a) then
     if isT(b) then
       for k,_ in pairs(b) do
@@ -110,7 +112,12 @@ function enlean(a,b)
   return a
 end
 
-function update (meta, update) -- @todo: implement it!
+function edit(meta, update)
+  for k,v in pairs(update) do
+    if isV(v) then
+      meta[k]=enrich(meta[k],meta[v])
+    end
+  end
   return meta
 end
 
@@ -157,12 +164,12 @@ do
     end
   end
   
-  if command == "update" then 
+  if command == "edit" then 
     for _, filename in ipairs(get_files(path)) do
       meta,text = get_data(filename)
       if meta > filter then 
+        put_data(filename,edit(meta,update),text)
         print(filename)
-        put_data(filename,update(meta,update),text)
       end
     end
   end
