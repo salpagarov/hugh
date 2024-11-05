@@ -63,27 +63,23 @@ function less(a, b)
 end
 
 function enrich(a,b)
-  if not a then a={} end
-  if isV(a) then a={a} end
-  if isT(a) then
-    if isT(b) then
-      for k,_ in pairs(b) do
-        if a[k] then
-          a[k] = enrich(a[k],b[k])
-        else
-          a[k] = b[k]
-        end
-      end
+  if isT(a) and isT(b) then
+    for k,_ in pairs(b) do
+      if a[k] then a[k]=enrich(a[k],b[k]) else a[k] = b[k] end
     end
   else
     if isV(a) then a={a} end
+    
     if isV(b) then b={b} end
-    for k1,v1 in pairs(b) do
-      local f = false
-      for k2,v2 in ipairs(a) do
-        if a[k2] == v1 then f=true end
+    if isA(a) and isA(b) then
+      for k1,v1 in pairs(b) do
+        local f = false
+        for k2,v2 in ipairs(a) do
+          if a[k2] == v1 then f=true end
+        end
+        if not f then table.insert(a,v1) end
       end
-      if not f then table.insert(a,v1) end
+      if #a == 1 then a=a[1] end
     end
   end
   return a
@@ -179,17 +175,20 @@ do
     Hugo JSON semantic helper
     Usage:
       hugh [<command> ['<filter-json>' ['<update-json>']]]
+      
     Commands:
       help    this text
-      core    get taxonomies
+      core    get taxonomies (semantic core)
       list    get posts list
       add     enrich metadata
       del     enlean metadata
-      update  update taxonomy
+      mod     modify metadata
+      
     Example:
       hugh add '{"categories" : "video"}' '{"tags" : "video"}'
       hugh del '{"categories" : "video"}' '{"categories" : "video"}'
-      hugh ren '{"authors" : ""}' '{"authors" : "persons"}'
+      hugh mod '{}' '{"authors" : "persons"}'
+      
     Requirments:
       luafilesystem, rxi-json
     ]=])
