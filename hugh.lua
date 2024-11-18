@@ -42,22 +42,25 @@ function put_data(filename, meta, text)
 end
 
 function less(a, b)
-  if isV(a) and isV(b) and (a == b or b == '') then return true end
-  if isV(a) and isA(b) then
-    for k,_ in pairs(b) do
-      if less(b[k],a) then return true end
-    end
-  end
-  if isA(a) and isA(b) then
-    for _,v in pairs(a) do
-      if less(b,v) then return true end
-    end
-  end
   if isT(a) and isT(b) then
-    for k,v in pairs(a) do
+    for k,_ in pairs(a) do
       if not b[k] or not less(b[k],a[k]) then return false end
     end
     return true
+  end
+  if isV(b) then b={b} end
+  if isV(a) then
+    for _,v in pairs(b) do
+      if a == v or v == "" then return true end
+    end
+    return false
+  end
+  if isA(a) then
+    local f = true
+    for _,v in pairs(a) do
+      if not less(v,b) then f=false end
+    end
+    return f
   end
   return false
 end
@@ -133,7 +136,9 @@ do
   if command == "core" then 
     for _,filename in pairs(get_files(path)) do
       meta = get_data(filename)
-      if meta > filter then core = core + meta end
+      if meta > filter then 
+        core = core + meta
+      end
     end
     print(json.encode(core))
   end
