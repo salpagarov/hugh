@@ -2,9 +2,9 @@
 
 fs, json = require "lfs", require "rxi-json"
 
+function isV(x) return type(x) ~= 'table' end
 function isT(x) return type(x) == 'table' and #x == 0 end
 function isA(x) return type(x) == 'table' and #x ~= 0 end
-function isV(x) return type(x) ~= 'table' end
 
 function get_files(directory)
   local files = {}
@@ -44,10 +44,11 @@ end
 function less(a, b)
   if isT(a) and isT(b) then
     for k,_ in pairs(a) do
-      if not b[k] or not less(b[k],a[k]) then return false end
+      if not b[k] or not less(a[k], b[k]) then return false end
     end
     return true
   end
+  
   if isV(b) then b={b} end
   if isV(a) then
     for _,v in pairs(b) do
