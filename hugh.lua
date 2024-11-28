@@ -22,7 +22,6 @@ function get_files(directory)
 end
 
 function get_data(filename)
-  -- @todo: skip reading wrong meta
   local file, meta, level = io.open(filename, 'r'), '', 0
   repeat
     local char = file:read(1)
@@ -39,19 +38,15 @@ function get_data(filename)
 end
 
 function put_data(filename, meta, text)
-  -- @todo: before writing needs normalize meta and align JSON
   return io.open(filename, 'w'):write(json.encode(meta)):write(text):close()
 end
 
 function less(a, b)
-  if isV(a) and isV(b) then
-    if a == b then return true else return false end
-  end
-  if isV(a) and isA(b) then
-    for _,v in pairs(b) do
-      if less(a,v) then return true end
+  if isT(a) and isT(b) then
+    for k,v in pairs(a) do
+      if not b[k] or not less(v,b[k]) then return false end
     end
-    return false
+    return true
   end
   if isA(a) and isA(b) then
     for _,v in pairs(a) do
@@ -59,11 +54,14 @@ function less(a, b)
     end
     return true
   end
-  if isT(a) and isT(b) then
-    for k,v in pairs(a) do
-      if not b[k] or not less(v,b[k]) then return false end
+  if isV(a) and isA(b) then
+    for _,v in pairs(b) do
+      if less(a,v) then return true end
     end
-    return true
+    return false
+  end
+  if isV(a) and isV(b) then
+    if a == b then return true else return false end
   end
   return false
 end
@@ -73,21 +71,20 @@ function enrich(a,b)
     for k,_ in pairs(b) do
       if a[k] then a[k]=enrich(a[k],b[k]) else a[k] = b[k] end
     end
-  else
-    if isV(a) then a={a} end
-    
-    if isV(b) then b={b} end
-    if isA(a) and isA(b) then
-      for k1,v1 in pairs(b) do
-        local f = false
-        for k2,v2 in ipairs(a) do
-          if a[k2] == v1 then f=true end
-        end
-        if not f then table.insert(a,v1) end
-      end
-      if #a == 1 then a=a[1] end
-    end
+    return a
   end
+  if isA(a) and isA(b) then
+    for k,v in pairs(b) do a=enrich(a,v) end
+    return a
+  end
+  if isA(a) and isV(b) then
+    for k,v in pairs(a) do
+      if b==v then return a end
+    end
+    table.insert(a,b)
+    return a
+  end
+  if isV(a) then return enrich({a},b) end
   return a
 end
 
