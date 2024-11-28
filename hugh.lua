@@ -22,6 +22,7 @@ function get_files(directory)
 end
 
 function get_data(filename)
+  -- @todo: skip reading wrong meta
   local file, meta, level = io.open(filename, 'r'), '', 0
   repeat
     local char = file:read(1)
@@ -38,30 +39,31 @@ function get_data(filename)
 end
 
 function put_data(filename, meta, text)
+  -- @todo: before writing needs normalize meta and align JSON
   return io.open(filename, 'w'):write(json.encode(meta)):write(text):close()
 end
 
 function less(a, b)
-  if isT(a) and isT(b) then
-    for k,_ in pairs(a) do
-      if not b[k] or not less(a[k], b[k]) then return false end
-    end
-    return true
+  if isV(a) and isV(b) then
+    if a == b then return true else return false end
   end
-  
-  if isV(b) then b={b} end
-  if isV(a) then
+  if isV(a) and isA(b) then
     for _,v in pairs(b) do
-      if a == v or v == "" then return true end
+      if less(a,v) then return true end
     end
     return false
   end
-  if isA(a) then
-    local f = true
+  if isA(a) and isA(b) then
     for _,v in pairs(a) do
-      if not less(v,b) then f=false end
+      if not less(v,b) then return false end
     end
-    return f
+    return true
+  end
+  if isT(a) and isT(b) then
+    for k,v in pairs(a) do
+      if not b[k] or not less(v,b[k]) then return false end
+    end
+    return true
   end
   return false
 end
