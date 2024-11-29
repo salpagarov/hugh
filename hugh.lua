@@ -67,6 +67,19 @@ function less(a, b)
 end
 
 function enrich(a,b)
+  
+  
+  
+  
+  if isV(a) then a={a} end
+  if isA(a) and isV(b) then
+    table.insert(a,b)
+    return a
+  end
+  if isA(a) and isA(b) then
+    for _,v in pairs(b) do a=enrich(a,v) end
+    return a
+  end
   if isT(a) and isT(b) then
     for k,_ in pairs(b) do
       if a[k] then a[k]=enrich(a[k],b[k]) else a[k] = b[k] end
@@ -190,9 +203,9 @@ do
       mod     modify metadata
       
     Example:
-      hugh add '{"categories" : "video"}' '{"tags" : "video"}'
-      hugh del '{"categories" : "video"}' '{"categories" : "video"}'
-      hugh mod '{}' '{"authors" : "persons"}'
+      hugh add '{"categories":"video"}' '{"tags":"video"}'
+      hugh del '{"categories":"video"}' '{"categories":"video"}'
+      hugh mod '{}' '{"authors":"persons"}'
       
     Requirments:
       luafilesystem, rxi-json
