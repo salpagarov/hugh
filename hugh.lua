@@ -1,10 +1,18 @@
 #!/usr/bin/env lua
 
-fs, json = require "lfs", require "rxi-json"
-
 function isV(x) return type(x) ~= 'table' end
-function isT(x) return type(x) == 'table' and #x == 0 end
 function isA(x) return type(x) == 'table' and #x ~= 0 end
+function isT(x) return type(x) == 'table' and #x == 0 end -- note: an empty array is also a table!
+function isE(x)
+  if x == nil then return true end
+  if type(x) ~= "table" then return false end
+  for k,v in pairs(x) do 
+    return false
+  end
+  return true
+end
+
+fs = require "lfs"
 
 function get_files(directory)
   local files = {}
@@ -20,6 +28,8 @@ function get_files(directory)
   end
   return files
 end
+
+json = require "rxi-json"
 
 function get_data(filename)
   local file, meta, level = io.open(filename, 'r'), '', 0
@@ -67,10 +77,6 @@ function less(a, b)
 end
 
 function enrich(a,b)
-  
-  
-  
-  
   if isV(a) then a={a} end
   if isA(a) and isV(b) then
     table.insert(a,b)
@@ -107,7 +113,7 @@ function enlean(a,b)
   if isA(a) and isA(b) then
     local t = {}
     for k,v in pairs(a) do t[v]=k end
-    for _,v in pairs(b) do
+    for _,v in pairs(b) do 
       if t[v] then t[v] = nil end
     end
     local x = {}
@@ -118,9 +124,21 @@ function enlean(a,b)
   end
   if isT(a) and isT(b) then
     for k,v in pairs(a) do
-      if b[k] then a[k] = enlean(a[k], b[k]) end
+      if b[k] then 
+        x = enlean(a[k], b[k])
+        
+        
+        
+        
+        if isE(x) then 
+          a[k] = nil
+        else
+          a[k] = x
+        end
+      end
     end
   end
+  
   return a
 end
 
