@@ -9,6 +9,7 @@ function isA(x)
   return false
 end
 function isE(x)
+  if x == nil then return true end
   if type(x) == "table" then
     for k,v in pairs(x) do return false end
   end
@@ -81,14 +82,18 @@ end
 
 function enrich(a,b)
   if isV(a) then a={a} end
-  
-  if (isA(a) or isE(a)) and isV(b) then 
-    a[#a+1]=b  -- fix duplicates!
+  if isA(a) and isV(b) then 
+    for k,v in pairs(a) do
+      if b == v then return a end
+    end
+    table.insert(a,b)
   end
   if isA(a) and isA(b) then 
-    for k,v in pairs(b) do a=enrich(a,v) end
+    for k,v in pairs(b) do 
+      a=enrich(a,v) 
+    end
   end
-  if isT(b) then
+  if isT(a) and isT(b) then
     for k,v in pairs(b) do a[k]=enrich(a[k],b[k]) end
   end
   return a
