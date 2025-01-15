@@ -1,13 +1,16 @@
 #!/usr/bin/env lua
 
 function isV(x) return type(x) ~= 'table' end
-function isA(x) return type(x) == 'table' and #x ~= 0 end
-function isT(x) return type(x) == 'table' and #x == 0 end -- note: an empty array is also a table!
+function isT(x) return type(x) == 'table' end
+function isA(x) 
+  if type(x) == "table" then
+    for k,v in ipairs(x) do return true end
+  end
+  return false
+end
 function isE(x)
-  if x == nil then return true end
-  if type(x) ~= "table" then return false end
-  for k,v in pairs(x) do 
-    return false
+  if type(x) == "table" then
+    for k,v in pairs(x) do return false end
   end
   return true
 end
@@ -78,67 +81,20 @@ end
 
 function enrich(a,b)
   if isV(a) then a={a} end
-  if isA(a) and isV(b) then
-    table.insert(a,b)
-    return a
+  
+  if (isA(a) or isE(a)) and isV(b) then 
+    a[#a+1]=b  -- fix duplicates!
   end
-  if isA(a) and isA(b) then
-    for _,v in pairs(b) do a=enrich(a,v) end
-    return a
-  end
-  if isT(a) and isT(b) then
-    for k,_ in pairs(b) do
-      if a[k] then a[k]=enrich(a[k],b[k]) else a[k] = b[k] end
-    end
-    return a
-  end
-  if isA(a) and isA(b) then
+  if isA(a) and isA(b) then 
     for k,v in pairs(b) do a=enrich(a,v) end
-    return a
   end
-  if isA(a) and isV(b) then
-    for k,v in pairs(a) do
-      if b==v then return a end
-    end
-    table.insert(a,b)
-    return a
+  if isT(b) then
+    for k,v in pairs(b) do a[k]=enrich(a[k],b[k]) end
   end
-  if isV(a) then return enrich({a},b) end
   return a
 end
 
 function enlean(a,b)
-  if isV(a) then a={a} end
-  if isV(b) then b={b} end
-  if isA(a) and isA(b) then
-    local t = {}
-    for k,v in pairs(a) do t[v]=k end
-    for _,v in pairs(b) do 
-      if t[v] then t[v] = nil end
-    end
-    local x = {}
-    for k,v in pairs(t) do
-      if v then x[v]=k end
-    end
-    return x
-  end
-  if isT(a) and isT(b) then
-    for k,v in pairs(a) do
-      if b[k] then 
-        x = enlean(a[k], b[k])
-        
-        
-        
-        
-        if isE(x) then 
-          a[k] = nil
-        else
-          a[k] = x
-        end
-      end
-    end
-  end
-  
   return a
 end
 
