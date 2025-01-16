@@ -97,7 +97,25 @@ function enrich(a,b)
 end
 
 function enlean(a,b)
-  return a
+  if isT(a) and isT(b) then
+    for k,v in pairs(b) do a[k] = enlean(a[k],b[k]) end
+    return a
+  end
+  if isA(a) and isA(b) then
+    for k,v in pairs(b) do a[k] = enlean(a,b[k]) end
+    return a
+  end
+  if isA(a) and isV(b) then
+    for k,v in pairs(a) do 
+      if a[k] == b[k] then a[k] = nil end
+    end
+    return a
+  end
+  if isV(a) and isV(b) then
+    if a == b then a = nil end
+    return a
+  end
+  print("wtf?!")
 end
 
 do
@@ -160,8 +178,8 @@ do
       del     enlean metadata
       
     Example:
-      hugh add '{"categories":"video"}' '{"tags":"video"}'
-      hugh del '{"categories":"video"}' '{"categories":"video"}'
+      hugh add  '{"categories":"video"}' '{"tags":"video"}'
+      hugh del  '{"categories":"video"}' '{"categories":"video"}'
       
     Requirments:
       luafilesystem, rxi-json
