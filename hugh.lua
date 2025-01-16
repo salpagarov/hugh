@@ -1,20 +1,13 @@
 #!/usr/bin/env lua
 
 function isV(x) return type(x) ~= 'table' end
-function isT(x) return type(x) == 'table' end
 function isA(x) 
   if type(x) == "table" then
     for k,v in ipairs(x) do return true end
   end
   return false
 end
-function isE(x)
-  if x == nil then return true end
-  if type(x) == "table" then
-    for k,v in pairs(x) do return false end
-  end
-  return true
-end
+function isT(x) return type(x) == 'table' and not isA(x) end
 
 fs = require "lfs"
 
@@ -81,22 +74,23 @@ function less(a, b)
 end
 
 function enrich(a,b)
-  if isV(a) then a={a} end
-  if isA(a) and isV(b) then 
-    for k,v in pairs(a) do
+  if isA(a) and isV(b) then
+    for k,v in pairs(a) do 
       if b == v then return a end
     end
     table.insert(a,b)
-  end
-  if isA(a) and isA(b) then 
-    for k,v in pairs(b) do 
-      a=enrich(a,v) 
-    end
+    return a
   end
   if isT(a) and isT(b) then
-    for k,v in pairs(b) do a[k]=enrich(a[k],b[k]) end
+    for k,v in pairs(b) do a[k] = enrich(a[k],b[k]) end
+    return a
   end
-  return a
+  if isA(a) and isA(b) then 
+    for k,v in pairs(b) do a = enrich(a,v) end
+    return a
+  end
+  print(a,b)
+  return {b}
 end
 
 function enlean(a,b)
@@ -129,7 +123,7 @@ do
     for _,filename in pairs(get_files(path)) do
       meta = get_data(filename)
       if meta > filter then 
-        core = core + meta
+        core = enrich(core,meta)
       end
     end
     print(json.encode(core))
