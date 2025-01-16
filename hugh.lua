@@ -100,15 +100,6 @@ function enlean(a,b)
   return a
 end
 
-function edit(meta, update)
-  for k,v in pairs(update) do
-    if isV(v) then
-      meta[k]=enrich(meta[k],meta[v])
-    end
-  end
-  return meta
-end
-
 do
   local path = fs.currentdir()
   local command = arg[1] or 'help'
@@ -137,7 +128,7 @@ do
     for _, filename in ipairs(get_files(path)) do
       meta,text = get_data(filename)
       if meta > filter then 
-        meta = meta + update
+        meta = enrich(meta,update)
         print(filename)
         put_data(filename,meta,text)
       end
@@ -148,23 +139,13 @@ do
     for _, filename in ipairs(get_files(path)) do
       meta,text = get_data(filename)
       if meta > filter then 
-        meta = meta - update
+        meta = enlean(meta,update)
         print(filename)
         put_data(filename,meta,text)
       end
     end
   end
   
-  if command == "edit" then 
-    for _, filename in ipairs(get_files(path)) do
-      meta,text = get_data(filename)
-      if meta > filter then 
-        put_data(filename,edit(meta,update),text)
-        print(filename)
-      end
-    end
-  end
-
   if command == "help" then
     print([=[
     Hugo JSON semantic helper
@@ -177,12 +158,10 @@ do
       list    get posts list
       add     enrich metadata
       del     enlean metadata
-      mod     modify metadata
       
     Example:
       hugh add '{"categories":"video"}' '{"tags":"video"}'
       hugh del '{"categories":"video"}' '{"categories":"video"}'
-      hugh mod '{}' '{"authors":"persons"}'
       
     Requirments:
       luafilesystem, rxi-json
