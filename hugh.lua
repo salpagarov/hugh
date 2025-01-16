@@ -68,19 +68,12 @@ function less(a, b)
     return false
   end
   if isV(a) and isV(b) then
-    if a == b then return true else return false end
+    if a == b then return true end
   end
   return false
 end
 
 function enrich(a,b)
-  if isA(a) and isV(b) then
-    for k,v in pairs(a) do 
-      if b == v then return a end
-    end
-    table.insert(a,b)
-    return a
-  end
   if isT(a) and isT(b) then
     for k,v in pairs(b) do a[k] = enrich(a[k],b[k]) end
     return a
@@ -89,8 +82,18 @@ function enrich(a,b)
     for k,v in pairs(b) do a = enrich(a,v) end
     return a
   end
-  print(a,b)
-  return {b}
+  if isA(a) and isV(b) then
+    for k,v in pairs(a) do 
+      if b == v then return a end
+    end
+    table.insert(a,b)
+    return a
+  end
+  if not a then 
+    if isV(b) then b = {b} end
+    a = b
+  end
+  return a
 end
 
 function enlean(a,b)
@@ -108,9 +111,10 @@ end
 
 do
   local path = fs.currentdir()
-  local magic = { __lt = less, __add = enrich, __sub = enlean }
-  local command, filter, update = arg[1] or 'help', setmetatable(json.decode(arg[2] or '{}'), magic), setmetatable(json.decode(arg[3] or '{}'), magic)
-  local core, meta = setmetatable({}, magic), setmetatable({}, magic)
+  local command = arg[1] or 'help'
+  local m = { __lt = less }
+  local filter, update = setmetatable(json.decode(arg[2] or '{}'), m), setmetatable(json.decode(arg[3] or '{}'), m)
+  local core, meta = setmetatable({}, m), setmetatable({}, m)
   
   if command == "list" then 
     for _, filename in ipairs(get_files(path)) do
