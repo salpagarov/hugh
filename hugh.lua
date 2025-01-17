@@ -1,13 +1,18 @@
 #!/usr/bin/env lua
 
-function isV(x) return type(x) ~= 'table' end
+function isV(x) return type(x) ~= 'table' and x ~= nil end
 function isA(x) 
   if type(x) == "table" then
     for k,v in ipairs(x) do return true end
   end
   return false
 end
-function isT(x) return type(x) == 'table' and not isA(x) end
+function isT(x) 
+  if type(x) == "table" then
+    for k,v in pairs(x) do return true end
+  end
+  return false
+end
 
 fs = require "lfs"
 
@@ -74,29 +79,32 @@ function less(a, b)
 end
 
 function enrich(a,b)
-  if isT(a) and isT(b) then
-    for k,v in pairs(b) do a[k] = enrich(a[k],b[k]) end
-    return a
-  end
-  if isA(a) and isA(b) then 
-    for k,v in pairs(b) do a = enrich(a,v) end
-    return a
-  end
-  if isA(a) and isV(b) then
+  if isV(a) then a={a} end
+  if not isA(a) and not isT(a) then return b end
+  
+  if (isT(a) or isA(a)) and isV(b) then
     for k,v in pairs(a) do 
       if b == v then return a end
     end
     table.insert(a,b)
     return a
   end
-  if not a then 
-    if isV(b) then b = {b} end
-    a = b
+  if isA(a) and isA(b) then 
+    for k,v in pairs(b) do a = enrich(a,v) end
+    return a
   end
-  return a
+  if isT(a) and isT(b) then
+    for k,v in pairs(b) do a[k] = enrich(a[k],b[k]) end
+    return a
+  end
+  print("wtf?!", isA(a), isT(a), json.encode(a), isA(b), isT(b), json.encode(b))
 end
 
 function enlean(a,b)
+  if isV(a) and isV(b) then
+    if not a or a == b then a = nil end
+    return a
+  end
   if isT(a) and isT(b) then
     for k,v in pairs(b) do a[k] = enlean(a[k],b[k]) end
     return a
@@ -111,11 +119,7 @@ function enlean(a,b)
     end
     return a
   end
-  if isV(a) and isV(b) then
-    if a == b then a = nil end
-    return a
-  end
-  print("wtf?!")
+  print("wtf?!",a,b)
 end
 
 do
@@ -135,9 +139,7 @@ do
   if command == "core" then 
     for _,filename in pairs(get_files(path)) do
       meta = get_data(filename)
-      if meta > filter then 
-        core = enrich(core,meta)
-      end
+      if meta > filter then core = enrich(core,meta) end
     end
     print(json.encode(core))
   end
