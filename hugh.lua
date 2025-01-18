@@ -81,7 +81,6 @@ end
 function enrich(a,b)
   if isV(a) then a={a} end
   if not isA(a) and not isT(a) then return b end
-  
   if (isT(a) or isA(a)) and isV(b) then
     for k,v in pairs(a) do 
       if b == v then return a end
@@ -95,9 +94,8 @@ function enrich(a,b)
   end
   if isT(a) and isT(b) then
     for k,v in pairs(b) do a[k] = enrich(a[k],b[k]) end
-    return a
   end
-  print("wtf?!", isA(a), isT(a), json.encode(a), isA(b), isT(b), json.encode(b))
+  return a
 end
 
 function enlean(a,b)
