@@ -13,6 +13,9 @@ function isT(x)
   end
   return false
 end
+function isE(x)
+  return not(isA(x) or isT(x))
+end
 
 fs = require "lfs"
 
@@ -74,7 +77,9 @@ function less(a, b)
   end
   if isV(a) and isV(b) then
     if a == b then return true end
+    return false
   end
+  if isE(a) and not isE(b) then return true end
   return false
 end
 
