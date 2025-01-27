@@ -104,7 +104,7 @@ function enrich(a,b)
 end
 
 function enlean(a,b)
-  if isE(a) then return a end
+  if isE(a) then return nil end
   if isT(a) and isT(b) then
     for k,v in pairs(b) do a[k] = enlean(a[k],b[k]) end
     return a
@@ -120,7 +120,10 @@ function enlean(a,b)
     return a
   end
   if isV(a) and isV(b) then
-    if a == b then return nil end
+    if a == b then 
+      print("remove last",a,b)
+      return nil 
+    end
   end
   print("wtf?!",a,b)
 end
