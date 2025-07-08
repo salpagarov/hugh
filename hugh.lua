@@ -1,24 +1,6 @@
 #!/usr/bin/env lua
 
-function isV(x) return type(x) ~= 'table' and x ~= nil end
-function isA(x) 
-  if type(x) == "table" then
-    for k,v in ipairs(x) do return true end
-  end
-  return false
-end
-function isT(x) 
-  if type(x) == "table" then
-    for k,v in pairs(x) do return true end
-  end
-  return false
-end
-function isE(x)
-  return not(isA(x) or isT(x))
-end
-
 fs = require "lfs"
-
 function get_files(directory)
   local files = {}
   for name in fs.dir(directory) do
@@ -35,7 +17,6 @@ function get_files(directory)
 end
 
 json = require "rxi-json"
-
 function get_data(filename)
   local file, meta, level = io.open(filename, 'r'), '', 0
   repeat
@@ -54,6 +35,26 @@ end
 
 function put_data(filename, meta, text)
   return io.open(filename, 'w'):write(json.encode(meta)):write(text):close()
+end
+
+function isV(x) return type(x) ~= 'table' and x ~= nil end
+
+function isA(x) 
+  if type(x) == "table" then
+    for k,v in ipairs(x) do return true end
+  end
+  return false
+end
+
+function isT(x) 
+  if type(x) == "table" then
+    for k,v in pairs(x) do return true end
+  end
+  return false
+end
+
+function isE(x)
+  return not(isA(x) or isT(x))
 end
 
 function less(a, b)
@@ -173,23 +174,21 @@ do
   end
   
   if command == "help" then
-    print([=[
-    Hugo JSON semantic helper
-    Usage:
-      hugh [<command> ['<filter-json>' ['<update-json>']]]
+    print([=[Hugo JSON frontmatter helper v0.1
+    
+    hugh [<command> ['<filter>' ['<update>']]]
+    commands:
+      core  get taxonomies
+      list  posts list
+      add   enrich meta
+      del   enlean meta
       
-    Commands:
-      help    this text
-      core    get taxonomies (semantic core)
-      list    get posts list
-      add     enrich metadata
-      del     enlean metadata
-      
-    Example:
+    examples:
       hugh add  '{"categories":"video"}' '{"tags":"video"}'
       hugh del  '{"categories":"video"}' '{"categories":"video"}'
+      hugh core
       
-    Requirments:
+    luarocks requirments:
       luafilesystem, rxi-json
     ]=])
   end
